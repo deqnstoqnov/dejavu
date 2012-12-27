@@ -9,38 +9,36 @@ my $cfg = new Config::Simple("dejavu.cfg");
 my $add;
 my $solve;
 my $id;
-my $search = $cfg->param("default_search");
+my $find = $cfg->param("default_search");
 my @labels; 
 my $verbose;
 my $list;
+my $description;
+my $solution;
 
 $result = GetOptions(
     "add"      => \$add,
     "edit"     => \$edit,
-    "search"   => \$search,
+    "find"     => \$find,
     "id=s"     => \$id,
     "labels=s@" => sub { 
                  my $a = shift;
                  my $b = shift;
                  @labels = split(/\s*,\s*/,$b);
                 },
+    "description=s" => \$description,
+    "solution=s" => \$solution,
+
     "verbose"  => \$verbose
 );
 
 my $conn = Database->new();
 
-if ($search != "") {
-    if (scalar @labels > 0 ){
-       $conn->print_all();
-    } else {
-       $conn->print_dejavu_with_labels(join(',',@labels)); 
-    }
+if ($find != "") {
+    $conn->print_dejavu_with(join(',',@labels), $description, $solution); 
 } elsif ($add != "") {
-    print "Labels : @labels\n";
-
     my $min_labels_count = $cfg->param("default_labels_count_min");
-    die "You have to specify at least $min_labels_count labels"
-      unless @labels >= $min_labels_count;
+    die "You have to specify at least $min_labels_count labels" unless @labels >= $min_labels_count;
 
     my $file = $cfg->param("add_file");
 
@@ -54,7 +52,7 @@ if ($search != "") {
 
     $conn->print_unresolved();
 
-} elsif ($edit) {
+} elsif ($edit != "") {
 
     my $file = $cfg->param("edit_file");
 
