@@ -34,9 +34,13 @@ $result = GetOptions(
 
 my $conn = Database->new();
 
-if ($find ne '') {
-    $conn->print_dejavu_with(join(',',@labels), $description, $solution); 
-} elsif ($add ne '') {
+if ($find != '') {
+    if ((scalar @labels == 0) && ($description eq '') && ($solution eq '')){
+       $conn->print_all(); 
+    } else {
+       $conn->print_dejavu_with(join(',',@labels), $description, $solution); 
+    }
+} elsif ($add != '') {
     my $min_labels_count = $cfg->param("default_labels_count_min");
     die "You have to specify at least $min_labels_count labels" unless @labels >= $min_labels_count;
 
@@ -52,7 +56,7 @@ if ($find ne '') {
 
     $conn->print_unresolved();
 
-} elsif ($edit ne '') {
+} elsif ($edit != '') {
 
     my $file = $cfg->param("edit_file");
 

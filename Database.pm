@@ -87,10 +87,6 @@ sub print_dejavu_with {
     my $description = shift;
     my $solution = shift;
     
-    print $labels;
-    print "Desc : ".$description;
-    print "\n";
-
     if ($labels ne ''){
        my @labels = split /\s*,\s*/, $labels;
     
@@ -122,7 +118,7 @@ sub print_dejavu_with {
        }
     }
 
-    if ($solution  ne ''){
+    if ($solution ne ''){
        my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where match(solution) against ($solution in boolean mode)";
        my $statement = $dbh->prepare($query);
        $statement->execute();
