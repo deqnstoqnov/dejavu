@@ -10,7 +10,7 @@ my $add;
 my $solve;
 my $id;
 my $search = $cfg->param("default_search");
-my $labels = undef; 
+my @labels; 
 my $verbose;
 my $list;
 
@@ -19,20 +19,24 @@ $result = GetOptions(
     "edit"     => \$edit,
     "search"   => \$search,
     "id=s"     => \$id,
-    "labels=s" => \$labels,
+    "labels=s@" => sub { 
+                 my $a = shift;
+                 my $b = shift;
+                 @labels = split(/\s*,\s*/,$b);
+                },
     "verbose"  => \$verbose
 );
 
 my $conn = Database->new();
 
-if ($search) {
-    if ( ! defined($labels) ){
+if ($search != "") {
+    if (scalar @labels > 0 ){
        $conn->print_all();
     } else {
-       $conn->print_err_with_labels($labels); 
+       $conn->print_dejavu_with_labels(join(',',@labels)); 
     }
-} elsif ($add) {
-    my @labels = split /\s*,\s*/, $labels;
+} elsif ($add != "") {
+    print "Labels : @labels\n";
 
     my $min_labels_count = $cfg->param("default_labels_count_min");
     die "You have to specify at least $min_labels_count labels"
@@ -46,7 +50,7 @@ if ($search) {
 
     system "rm $file";
 
-    $conn->put_err( join( "\n", $desc ), $labels );
+    $conn->put_dejavu( join( "\n", $desc ), join(',',@$labels) );
 
     $conn->print_unresolved();
 

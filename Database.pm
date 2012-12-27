@@ -3,7 +3,7 @@ package Database;
 use Config::Simple;
 use DBI;
 
-my $cfg = new Config::Simple("err.cfg");
+my $cfg = new Config::Simple("dejavu.cfg");
 my $dbh;
 
 sub new {
@@ -24,7 +24,7 @@ sub get_solution_by_id {
     my $class = shift;
     my $id    = shift;
 
-    my $query = "select solution from err where id = ?";
+    my $query = "select solution from dejavu where id = ?";
     my $statement = $dbh->prepare($query);
     $statement->execute($id);
     if ( $statement->rows != 0 ) {
@@ -36,7 +36,7 @@ sub get_solution_by_id {
     }
 }
 
-sub put_err {
+sub put_dejavu {
     my $class = shift;
 
     my $desc   = shift;
@@ -45,7 +45,7 @@ sub put_err {
 
     print $labels. "\n";
 
-    my $query = "insert into err ( user,description,labels, date_created) values (?, ?, ?, NOW())";
+    my $query = "insert into dejavu ( user,description,labels, date_created) values (?, ?, ?, NOW())";
     my $statement = $dbh->prepare($query);
     $statement->execute( $user, $desc, $labels );
 }
@@ -53,12 +53,12 @@ sub put_err {
 sub print_all {
     my $class = shift;
 
-    my $query = "select id, user, labels, description, date_created, solution, date_resolved from err";
+    my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu";
     my $statement = $dbh->prepare($query);
     $statement->execute();
 
     while ( my @data = $statement->fetchrow_array() ) {
-       print_err(\@data);
+       print_dejavu(\@data);
     }
 
 }
@@ -67,39 +67,40 @@ sub print_all {
 sub print_unresolved {
     my $class = shift;
 
-    my $query = "select id, user, labels, description, date_created, solution, date_resolved from err where resolved = false";
+    my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where resolved = false";
     my $statement = $dbh->prepare($query);
     $statement->execute();
 
     while ( my @data = $statement->fetchrow_array() ) {
-       print_err(@data);
+       print_dejavu(\@data);
     }
 
 }
 
-sub print_err_with_labels{
+sub print_dejavu_with_labels{
     my $class = shift;
     my $labels = shift;
 
     my @labels = split /\s*,\s*/, $labels;
     
-    my $end = ' and ';
+    my $fulltext = "'";
     foreach my $label (@labels){
-		     $end.=" labels like '"."%$label%"."' or";	
+		     $fulltext.= "+$label ";	
     }
-    $end =~ s/or$//;
+    $fulltext=~s/ $//;
+    $fulltext.="'";
 
-    my $query = "select id, user, labels, description, date_created, solution, date_resolved from err where 1 = 1 ".$end;
+    my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where match(labels) against ($fulltext in boolean mode)".$end;
     my $statement = $dbh->prepare($query);
     $statement->execute();
 
     while ( my @data = $statement->fetchrow_array() ) {
-       print_err(\@data);
+       print_dejavu(\@data);
     }
      
 }
 
-sub print_err {
+sub print_dejavu {
    my $data = shift;
    
    print("===============================================================================\n");
@@ -126,7 +127,7 @@ sub mark_as_resolved {
     my $id       = shift;
     my $solution = shift;
 
-    my $query     = "update err set resolved = true, solution = ? where id = ?";
+    my $query     = "update dejavu set resolved = true, solution = ? where id = ?";
     my $statement = $dbh->prepare($query);
     $statement->execute( $solution, $id );
 }
