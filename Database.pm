@@ -50,6 +50,19 @@ sub put_dejavu {
     $statement->execute( $user, $desc, $labels );
 }
 
+sub print_array{
+    my $array = shift;
+
+    my $count = scalar @$array;
+
+    foreach (@$array) {
+       print_dejavu($_);
+    }
+
+    print "---------------------------------------------\n";
+    print "Total dejavu count: $count \n";
+}
+
 sub print_all {
     my $class = shift;
 
@@ -57,14 +70,7 @@ sub print_all {
     my $statement = $dbh->prepare($query);
     $statement->execute();
 
-    while ( my @data = $statement->fetchrow_array() ) {
-       print_dejavu(\@data);
-    }
-
-    my $total = scalar $statement->rows;
-    print "---------------------------------------------\n";
-    print "Total dejavu count: $total \n";
-
+    print_array( $statement->fetchall_arrayref() ); 
 }
 
 
@@ -75,10 +81,7 @@ sub print_unresolved {
     my $statement = $dbh->prepare($query);
     $statement->execute();
 
-    while ( my @data = $statement->fetchrow_array() ) {
-       print_dejavu(\@data);
-    }
-
+    print_array( $statement->fetchall_arrayref() ); 
 }
 
 sub print_dejavu_with {
@@ -87,46 +90,25 @@ sub print_dejavu_with {
     my $description = shift;
     my $solution = shift;
     
-    if ($labels ne ''){
-       my @labels = split /\s*,\s*/, $labels;
+    my @labels = split /\s*,\s*/, $labels;
     
-       my $fulltext = "'";
-       foreach my $label (@labels){
-		       $fulltext.= "+$label ";	
-       }
-       $fulltext=~s/ $//;
-       $fulltext.="'";
-
-       my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where match(labels) against ($fulltext in boolean mode)";
-       print $query;
-       my $statement = $dbh->prepare($query);
-       $statement->execute();
-
-       while ( my @data = $statement->fetchrow_array() ) {
-          print_dejavu(\@data);
-       }
+    my $fulltext = "'";
+    foreach my $label (@labels){
+		    $fulltext.= "+$label ";	
     }
+    $fulltext=~s/ $//;
+    $fulltext.="'";
 
-   
-    if ($description ne ''){
-       my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where match(description) against ('*$description*' in boolean mode)";
-       my $statement = $dbh->prepare($query);
-       $statement->execute();
+    my $query = "select id, user, labels, description, date_created, solution, date_resolved 
+                 from dejavu 
+                 where match(labels) against ($fulltext in boolean mode) or 
+                       match(description) against ('*$description*' in boolean mode) or
+                       match(solution) against ('*$solution*' in boolean mode)";
+    print $query;
+    my $statement = $dbh->prepare($query);
+    $statement->execute();
 
-       while ( my @data = $statement->fetchrow_array() ) {
-         print_dejavu(\@data);
-       }
-    }
-
-    if ($solution ne ''){
-       my $query = "select id, user, labels, description, date_created, solution, date_resolved from dejavu where match(solution) against ($solution in boolean mode)";
-       my $statement = $dbh->prepare($query);
-       $statement->execute();
-
-       while ( my @data = $statement->fetchrow_array() ) {
-          print_dejavu(\@data);
-       }
-    }
+    print_array( $statement->fetchall_arrayref() ); 
      
 }
 

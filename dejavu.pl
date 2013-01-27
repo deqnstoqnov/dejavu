@@ -57,7 +57,6 @@ if ($find != '') {
     $conn->print_unresolved();
 
 } elsif ($edit != '') {
-
     my $file = $cfg->param("edit_file");
 
     # read previous solution from db and write it to file
@@ -66,7 +65,7 @@ if ($find != '') {
     print "The ID to be fetched: $id\n";
     print "Previous content from DB: $previous \n";
     write_file($file,$previous);
-    system "/usr/bin/vim -c 'startinsert' $file";
+    system "/usr/bin/vim $file";
 
     my $solution = read_file($file);
 
