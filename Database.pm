@@ -43,8 +43,6 @@ sub put_dejavu {
     my $labels = shift;
     my $user   = $cfg->param("confluence_user");
 
-    print $labels. "\n";
-
     my $query = "insert into dejavu ( user,description,labels, date_created) values (?, ?, ?, NOW())";
     my $statement = $dbh->prepare($query);
     $statement->execute( $user, $desc, $labels );
@@ -104,7 +102,6 @@ sub print_dejavu_with {
                  where match(labels) against ($fulltext in boolean mode) or 
                        match(description) against ('*$description*' in boolean mode) or
                        match(solution) against ('*$solution*' in boolean mode)";
-    print $query;
     my $statement = $dbh->prepare($query);
     $statement->execute();
 

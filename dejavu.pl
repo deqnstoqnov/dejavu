@@ -21,10 +21,11 @@ $result = GetOptions(
     "edit"     => \$edit,
     "find"     => \$find,
     "id=s"     => \$id,
-    "labels=s@" => sub { 
+    "labels=s" => sub { 
                  my $a = shift;
                  my $b = shift;
                  @labels = split(/\s*,\s*/,$b);
+                 print scalar @labels;
                 },
     "description=s" => \$description,
     "solution=s" => \$solution,
@@ -52,7 +53,7 @@ if ($find != '') {
 
     system "rm $file";
 
-    $conn->put_dejavu( join( "\n", $desc ), join(',',@$labels) );
+    $conn->put_dejavu( join( "\n", $desc ), join(',',@labels) );
 
     $conn->print_unresolved();
 
