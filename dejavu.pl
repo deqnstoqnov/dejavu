@@ -1,10 +1,13 @@
 #!/usr/bin/perl
+use FindBin;
+use lib "/usr/lib/dejavu";
+use Database;
+
 use Getopt::Long;
 use Config::Simple;
-use Database;
 use File::Slurp;
 
-my $cfg = new Config::Simple("dejavu.cfg");
+my $cfg = new Config::Simple("/usr/lib/dejavu/dejavu.cfg");
 
 my $add;
 my $solve;

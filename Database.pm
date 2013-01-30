@@ -3,7 +3,7 @@ package Database;
 use Config::Simple;
 use DBI;
 
-my $cfg = new Config::Simple("dejavu.cfg");
+my $cfg = new Config::Simple("/usr/lib/dejavu/dejavu.cfg");
 my $dbh;
 
 sub new {
